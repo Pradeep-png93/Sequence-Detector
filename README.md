@@ -76,7 +76,8 @@ always @(posedge clk or posedge reset) begin
     end
 endmodule
 
-Output: ![moore out](https://github.com/user-attachments/assets/9a71a21a-bee2-4c2b-8fc1-8a09fcccdaf6)
+Output:![image](https://github.com/user-attachments/assets/9e3cc49d-fa7a-4e04-ad31-374c7875f2f1)
+
 
 
 Verilog Code for Sequence Detector Using Mealy FSM
@@ -129,59 +130,119 @@ module fsm_sequence(
     end
 endmodule
 
-Output: ![mealey out](https://github.com/user-attachments/assets/fb44afcf-7113-417d-aff7-739028944eb1)
+Output: ![image](https://github.com/user-attachments/assets/2612e3b0-864d-4f91-89f3-380831be4e40)
 
 
 
-
-Testbench for Sequence Detector (Moore and Mealy FSMs)
-
-`timescale 1ns/1ps
+Testbench for moore:
 
 module tb_fsm_sequence;
- 
-  reg clk;
+
+ reg clk;
     reg reset;
     reg run;
     wire [3:0] count;
- 
-fsm_sequence uut (
+    fsm_sequence uut (
         .clk(clk),
         .reset(reset),
         .run(run),
         .count(count)
     );
-  
- always #10 clk = ~clk; // Toggle clock every 10 time units (20ns period)
-    initial begin
-      
-clk = 0;
+  always #10 clk = ~clk;
+  initial begin
+        clk = 0;
         reset = 1;
         run = 0;
-        #20 reset = 0;  // De-assert reset after 20ns
-        #20 run = 1;    // Start running the FSM after 20ns
-       #100 run = 0;   // Stop the FSM by disabling run
-        #40 run = 1;    // Restart the FSM after a short pause
-        #100 $finish;   // End the simulation
+        #20 reset = 0; 
+        #20 run = 1;   
+        #100 run = 0;   
+        #40 run = 1;   
+        #100 $finish;   
     end
- initial begin
+   
+   initial begin
         $monitor("Time: %0t | clk: %b | reset: %b | run: %b | count: %d", 
                  $time, clk, reset, run, count);
     end
- initial begin
+
+  initial begin
         $dumpfile("fsm_sequence_tb.vcd");
         $dumpvars(0, tb_fsm_sequence);
     end
 
 endmodule
 
-Output: ![tb](https://github.com/user-attachments/assets/b39b99ce-815c-4662-93e9-664a52cd4350)
+Output: ![image](https://github.com/user-attachments/assets/f7eaeb6d-2f6b-4ef2-b7c9-7632fc7828d1)
 
 
+Testbench for Mealey:
 
+module mealy(clk,rst,inp,out);
+ input clk, rst, inp;
+ output out;
+ reg out;
+ reg [1:0] state;
+ always @(posedge clk, posedge rst)
+ begin
+     if(rst)
+     begin
+     out <= 0;
+            state <= 2'b00;
+         end
+     else
+         begin
+             case (state)
+             2'b00: 
+                 begin
+                     if (inp) begin
+                         state <=2'b01;
+                         out <=0;
+                     end
+                     else begin
+                         state <=2'b10;
+                         out <=0;
+                    end
+                 end
+             2'b01:
+                 begin
 
+ if(inp) begin
+  state <= 2'b00;
+   out <= 1;
+ end
 
+ else begin
+  state <= 2'b10;
+ out <= 0
+end
+ end
+ 2'b10:
+begin
+ if(inp)
+ begin
 
+  state <= 2'b01;
+
+  out <= 0;
+
+  end
+ else begin
+
+  state <= 2'b00;
+      out <= 1;
+         end
+    end
+ default:
+                 begin
+                     state <= 2'b00;
+                     out <= 0;
+                 end
+             endcase
+         end
+ end
+ endmodule
+
+ Output:![image](https://github.com/user-attachments/assets/9aad9786-51d1-410a-a8c3-219c576b869f)
 
 Conclusion
 In this experiment, Moore and Mealy FSMs were successfully designed and simulated to detect the sequence 1011. Both designs worked as expected, with the main difference being that the Moore FSM generated the output based on the current state, while the Mealy FSM generated the output based on both the current state and input. The testbench verified the functionality of both FSMs, demonstrating that the Verilog HDL can effectively model both types of state machines for sequence detection tasks.
